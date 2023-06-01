@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter_cache_manager/src/storage/file_system/file_system.dart';
 
 import '../flutter_cache_manager.dart';
-import 'storage/cache_object.dart';
 
 ///Flutter Cache Manager
 ///Copyright (c) 2019 Rene Floor
@@ -23,7 +22,7 @@ class CacheStore {
   int get _capacity => _config.maxNrOfCacheObjects;
   Duration get _maxAge => _config.stalePeriod;
   String? get _projectId => _config.projectId;
-  Function({required List<CacheObject> cacheObjects}) get _onRemoved => _config.onRemoved;
+  Function({required List<CacheObject> cacheObjects})? get _onRemoved => _config.onRemoved;
 
   DateTime lastCleanupRun = DateTime.now();
   Timer? _scheduledCleanup;
@@ -183,7 +182,9 @@ class CacheStore {
     if (await file.exists()) {
       await file.delete();
     }
-    _onRemoved(cacheObjects: [cacheObject]);
+    if (_onRemoved != null) {
+      _onRemoved!(cacheObjects: [cacheObject]);
+    }
   }
 
   Future<void> dispose() async {

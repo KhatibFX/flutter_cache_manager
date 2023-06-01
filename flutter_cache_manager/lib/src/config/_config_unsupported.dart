@@ -22,6 +22,7 @@ class Config implements def.Config {
     FileService? fileService,
     //ignore: avoid_unused_constructor_parameters
     String? projectId,
+    //ignore: avoid_unused_constructor_parameters
     Function({required List<CacheObject> cacheObjects})? onRemoved,
   }) {
     throw UnsupportedError('Platform is not supported');
@@ -49,5 +50,5 @@ class Config implements def.Config {
   String? get projectId => throw UnimplementedError();
 
   @override
-  Function({required List<CacheObject> cacheObjects}) get onRemoved => throw UnimplementedError();
+  Function({required List<CacheObject> cacheObjects})? get onRemoved => throw UnimplementedError();
 }

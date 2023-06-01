@@ -45,7 +45,7 @@ class Config implements def.Config {
   final String? projectId;
 
   @override
-  final Function({required List<CacheObject> cacheObjects}) onRemoved;
+  final Function({required List<CacheObject> cacheObjects})? onRemoved;
 
   static CacheInfoRepository _createRepo(String key) {
     if (Platform.isAndroid || Platform.isIOS || Platform.isMacOS) {
