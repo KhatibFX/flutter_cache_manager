@@ -161,6 +161,7 @@ class CacheObjectProvider extends CacheInfoRepository with CacheInfoRepositoryHe
   /// unless not enough objects are found:
   /// 1. Objects that belong to another project, preferably the least recently accessed, where the type is other
   /// 2. Objects that belong to another project, preferably the least recently accessed, where the type is blueprint
+  /// 3. Objects that belong to the current project, preferably the least recently accessed, where the type is other
 
   @override
   Future<List<CacheObject>> getObjectsOverCapacity({required int capacity, required String projectId}) async {
@@ -177,7 +178,7 @@ class CacheObjectProvider extends CacheInfoRepository with CacheInfoRepositoryHe
     List<CacheObject> result = [];
     if (overCapacityCacheObjectList.isNotEmpty) {
       // Database is over capacity. Query the database and pick objects based on the order above.
-      List<CacheObject> otherProjectNotBlueprintCacheObjectList = CacheObject.fromMapList(await db!.query(
+      List<CacheObject> otherProjectOtherCacheObjectList = CacheObject.fromMapList(await db!.query(
         _tableCacheObject,
         columns: null,
         orderBy: '${CacheObject.columnTouched} ASC',
@@ -185,8 +186,8 @@ class CacheObjectProvider extends CacheInfoRepository with CacheInfoRepositoryHe
         whereArgs: [projectId, CacheObjectType.other.index],
         limit: newLimit,
       ));
-      result.addAll(otherProjectNotBlueprintCacheObjectList);
-      newLimit -= otherProjectNotBlueprintCacheObjectList.length;
+      result.addAll(otherProjectOtherCacheObjectList);
+      newLimit -= otherProjectOtherCacheObjectList.length;
       if (newLimit > 0) {
         List<CacheObject> otherProjectBlueprintCacheObjectList = CacheObject.fromMapList(await db!.query(
           _tableCacheObject,
@@ -197,6 +198,18 @@ class CacheObjectProvider extends CacheInfoRepository with CacheInfoRepositoryHe
           limit: newLimit,
         ));
         result.addAll(otherProjectBlueprintCacheObjectList);
+        newLimit -= otherProjectBlueprintCacheObjectList.length;
+        if (newLimit > 0) {
+          List<CacheObject> currentProjectOtherCacheObjectList = CacheObject.fromMapList(await db!.query(
+            _tableCacheObject,
+            columns: null,
+            orderBy: '${CacheObject.columnTouched} ASC',
+            where: '${CacheObject.columnProjectId} = ? AND ${CacheObject.columnType} = ?',
+            whereArgs: [projectId, CacheObjectType.other.index],
+            limit: newLimit,
+          ));
+          result.addAll(currentProjectOtherCacheObjectList);
+        }
       }
     }
     return result;
