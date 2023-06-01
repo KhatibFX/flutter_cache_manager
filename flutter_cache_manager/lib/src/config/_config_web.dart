@@ -45,5 +45,5 @@ class Config implements def.Config {
   final String? projectId;
 
   @override
-  final Function({required List<CacheObject> cachedObjects}) onRemoved;
+  final Function({required List<CacheObject> cacheObjects}) onRemoved;
 }

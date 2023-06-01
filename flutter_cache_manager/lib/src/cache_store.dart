@@ -23,7 +23,7 @@ class CacheStore {
   int get _capacity => _config.maxNrOfCacheObjects;
   Duration get _maxAge => _config.stalePeriod;
   String? get _projectId => _config.projectId;
-  Function({required List<CacheObject> cachedObjects}) get _onRemoved => _config.onRemoved;
+  Function({required List<CacheObject> cacheObjects}) get _onRemoved => _config.onRemoved;
 
   DateTime lastCleanupRun = DateTime.now();
   Timer? _scheduledCleanup;
@@ -183,7 +183,7 @@ class CacheStore {
     if (await file.exists()) {
       await file.delete();
     }
-    _onRemoved(cachedObjects: [cacheObject]);
+    _onRemoved(cacheObjects: [cacheObject]);
   }
 
   Future<void> dispose() async {

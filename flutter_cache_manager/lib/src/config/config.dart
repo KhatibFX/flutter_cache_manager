@@ -33,7 +33,7 @@ abstract class Config {
     FileSystem fileSystem,
     FileService fileService,
     String? projectId,
-    Function({required List<CacheObject> cachedObjects}) onRemoved,
+    Function({required List<CacheObject> cacheObjects}) onRemoved,
   }) = impl.Config;
 
   String get cacheKey;
@@ -43,5 +43,5 @@ abstract class Config {
   FileSystem get fileSystem;
   FileService get fileService;
   String? get projectId;
-  Function({required List<CacheObject> cachedObjects}) get onRemoved;
+  Function({required List<CacheObject> cacheObjects}) get onRemoved;
 }
