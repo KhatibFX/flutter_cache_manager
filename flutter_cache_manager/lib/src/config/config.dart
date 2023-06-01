@@ -32,7 +32,7 @@ abstract class Config {
     CacheInfoRepository repo,
     FileSystem fileSystem,
     FileService fileService,
-    String projectId,
+    String? projectId,
     Function({required List<CacheObject> cachedObjects}) onRemoved,
   }) = impl.Config;
 
@@ -42,6 +42,6 @@ abstract class Config {
   CacheInfoRepository get repo;
   FileSystem get fileSystem;
   FileService get fileService;
-  String get projectId;
+  String? get projectId;
   Function({required List<CacheObject> cachedObjects}) get onRemoved;
 }

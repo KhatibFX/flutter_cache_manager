@@ -22,7 +22,7 @@ class CacheStore {
   final Future<CacheInfoRepository> _cacheInfoRepository;
   int get _capacity => _config.maxNrOfCacheObjects;
   Duration get _maxAge => _config.stalePeriod;
-  String get _projectId => _config.projectId;
+  String? get _projectId => _config.projectId;
   Function({required List<CacheObject> cachedObjects}) get _onRemoved => _config.onRemoved;
 
   DateTime lastCleanupRun = DateTime.now();
@@ -133,9 +133,11 @@ class CacheStore {
     final toRemove = <int>[];
     final provider = await _cacheInfoRepository;
 
-    final overCapacity = await provider.getObjectsOverCapacity(capacity: _capacity, projectId: _projectId);
-    for (final cacheObject in overCapacity) {
-      unawaited(_removeCachedFile(cacheObject, toRemove));
+    if (_projectId != null) {
+      final overCapacity = await provider.getObjectsOverCapacity(capacity: _capacity, projectId: _projectId!);
+      for (final cacheObject in overCapacity) {
+        unawaited(_removeCachedFile(cacheObject, toRemove));
+      }
     }
 
     final oldObjects = await provider.getOldObjects(maxAge: _maxAge);

@@ -46,7 +46,7 @@ class Config implements def.Config {
   FileService get fileService => throw UnimplementedError();
 
   @override
-  String get projectId => throw UnimplementedError();
+  String? get projectId => throw UnimplementedError();
 
   @override
   Function({required List<CacheObject> cachedObjects}) get onRemoved => throw UnimplementedError();

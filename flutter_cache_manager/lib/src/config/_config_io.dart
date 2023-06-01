@@ -42,7 +42,7 @@ class Config implements def.Config {
   final FileService fileService;
 
   @override
-  final String projectId;
+  final String? projectId;
 
   @override
   final Function({required List<CacheObject> cachedObjects}) onRemoved;
