@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:clock/clock.dart';
 import 'package:http/http.dart' as http;
+
 import 'mime_converter.dart';
 
 ///Flutter Cache Manager
@@ -22,12 +24,10 @@ abstract class FileService {
 class HttpFileService extends FileService {
   final http.Client _httpClient;
 
-  HttpFileService({http.Client? httpClient})
-      : _httpClient = httpClient ?? http.Client();
+  HttpFileService({http.Client? httpClient}) : _httpClient = httpClient ?? http.Client();
 
   @override
-  Future<FileServiceResponse> get(String url,
-      {Map<String, String>? headers}) async {
+  Future<FileServiceResponse> get(String url, {Map<String, String>? headers}) async {
     final req = http.Request('GET', Uri.parse(url));
     if (headers != null) {
       req.headers.addAll(headers);
@@ -51,7 +51,7 @@ abstract class FileServiceResponse {
   int get statusCode;
 
   /// Defines till when the cache should be assumed to be valid.
-  DateTime get validTill;
+  DateTime? get validTill;
 
   /// [eTag] is used when asking to update the cache
   String? get eTag;
@@ -82,9 +82,9 @@ class HttpGetResponse implements FileServiceResponse {
   int? get contentLength => _response.contentLength;
 
   @override
-  DateTime get validTill {
-    // Without a cache-control header we keep the file for a week
-    var ageDuration = const Duration(days: 7);
+  DateTime? get validTill {
+    // Without a cache-control header we keep the file forever
+    Duration? ageDuration;
     final controlHeader = _header(HttpHeaders.cacheControlHeader);
     if (controlHeader != null) {
       final controlSettings = controlHeader.split(',');
@@ -102,7 +102,7 @@ class HttpGetResponse implements FileServiceResponse {
       }
     }
 
-    return _receivedTime.add(ageDuration);
+    return ageDuration != null ? _receivedTime.add(ageDuration) : null;
   }
 
   @override

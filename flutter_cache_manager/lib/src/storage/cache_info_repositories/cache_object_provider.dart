@@ -4,13 +4,13 @@ import 'package:flutter_cache_manager/src/storage/cache_info_repositories/helper
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
+
 import '../cache_object.dart';
 import 'cache_info_repository.dart';
 
 const _tableCacheObject = 'cacheObject';
 
-class CacheObjectProvider extends CacheInfoRepository
-    with CacheInfoRepositoryHelperMethods {
+class CacheObjectProvider extends CacheInfoRepository with CacheInfoRepositoryHelperMethods {
   Database? db;
   String? _path;
   String? databaseName;
@@ -27,8 +27,7 @@ class CacheObjectProvider extends CacheInfoRepository
     }
     var path = await _getPath();
     await File(path).parent.create(recursive: true);
-    db = await openDatabase(path, version: 3,
-        onCreate: (Database db, int version) async {
+    db = await openDatabase(path, version: 4, onCreate: (Database db, int version) async {
       await db.execute('''
       create table $_tableCacheObject (
         ${CacheObject.columnId} integer primary key,
@@ -38,7 +37,9 @@ class CacheObjectProvider extends CacheInfoRepository
         ${CacheObject.columnETag} text,
         ${CacheObject.columnValidTill} integer,
         ${CacheObject.columnTouched} integer,
-        ${CacheObject.columnLength} integer
+        ${CacheObject.columnLength} integer,
+        ${CacheObject.columnProjectId} text
+        ${CacheObject.columnType} integer
         );
         create unique index $_tableCacheObject${CacheObject.columnKey}
         ON $_tableCacheObject (${CacheObject.columnKey});
@@ -82,6 +83,21 @@ class CacheObjectProvider extends CacheInfoRepository
           if (!e.isDuplicateColumnError(CacheObject.columnLength)) rethrow;
         }
       }
+      if (oldVersion <= 3) {
+        try {
+          await db.execute('''
+        alter table $_tableCacheObject
+        add ${CacheObject.columnProjectId} text;
+        ''');
+          await db.execute('''
+        alter table $_tableCacheObject
+        add ${CacheObject.columnType} integer;
+        ''');
+        } on DatabaseException catch (e) {
+          if (!(e.isDuplicateColumnError(CacheObject.columnProjectId) ||
+              e.isDuplicateColumnError(CacheObject.columnType))) rethrow;
+        }
+      }
     });
     return opened();
   }
@@ -96,8 +112,7 @@ class CacheObjectProvider extends CacheInfoRepository
   }
 
   @override
-  Future<CacheObject> insert(CacheObject cacheObject,
-      {bool setTouchedToNow = true}) async {
+  Future<CacheObject> insert(CacheObject cacheObject, {bool setTouchedToNow = true}) async {
     var id = await db!.insert(
       _tableCacheObject,
       cacheObject.toMap(setTouchedToNow: setTouchedToNow),
@@ -107,8 +122,8 @@ class CacheObjectProvider extends CacheInfoRepository
 
   @override
   Future<CacheObject?> get(String key) async {
-    List<Map> maps = await db!.query(_tableCacheObject,
-        columns: null, where: '${CacheObject.columnKey} = ?', whereArgs: [key]);
+    List<Map> maps =
+        await db!.query(_tableCacheObject, columns: null, where: '${CacheObject.columnKey} = ?', whereArgs: [key]);
     if (maps.isNotEmpty) {
       return CacheObject.fromMap(maps.first.cast<String, dynamic>());
     }
@@ -117,14 +132,12 @@ class CacheObjectProvider extends CacheInfoRepository
 
   @override
   Future<int> delete(int id) {
-    return db!.delete(_tableCacheObject,
-        where: '${CacheObject.columnId} = ?', whereArgs: [id]);
+    return db!.delete(_tableCacheObject, where: '${CacheObject.columnId} = ?', whereArgs: [id]);
   }
 
   @override
   Future<int> deleteAll(Iterable<int> ids) {
-    return db!.delete(_tableCacheObject,
-        where: '${CacheObject.columnId} IN (' + ids.join(',') + ')');
+    return db!.delete(_tableCacheObject, where: '${CacheObject.columnId} IN (' + ids.join(',') + ')');
   }
 
   @override
@@ -144,28 +157,59 @@ class CacheObjectProvider extends CacheInfoRepository
     );
   }
 
+  /// For the wakecap cache manager, objects over capacity should be picked based on the following order
+  /// unless not enough objects are found:
+  /// 1. Objects that belong to another project, preferably the least recently accessed, where the type is other
+  /// 2. Objects that belong to another project, preferably the least recently accessed, where the type is blueprint
+
   @override
-  Future<List<CacheObject>> getObjectsOverCapacity(int capacity) async {
-    return CacheObject.fromMapList(await db!.query(
+  Future<List<CacheObject>> getObjectsOverCapacity({required int capacity, required String projectId}) async {
+    List<CacheObject> overCapacityCacheObjectList = CacheObject.fromMapList(await db!.query(
       _tableCacheObject,
       columns: null,
       orderBy: '${CacheObject.columnTouched} DESC',
       where: '${CacheObject.columnTouched} < ?',
-      whereArgs: [
-        DateTime.now().subtract(const Duration(days: 1)).millisecondsSinceEpoch
-      ],
+      whereArgs: [DateTime.now().subtract(const Duration(days: 1)).millisecondsSinceEpoch],
       limit: 100,
       offset: capacity,
     ));
+    int newLimit = overCapacityCacheObjectList.length;
+    List<CacheObject> result = [];
+    if (overCapacityCacheObjectList.isNotEmpty) {
+      // Database is over capacity. Query the database and pick objects based on the order above.
+      List<CacheObject> otherProjectNotBlueprintCacheObjectList = CacheObject.fromMapList(await db!.query(
+        _tableCacheObject,
+        columns: null,
+        orderBy: '${CacheObject.columnTouched} ASC',
+        where: '${CacheObject.columnProjectId} != ? AND ${CacheObject.columnType} = ?',
+        whereArgs: [projectId, CacheObjectType.other.index],
+        limit: newLimit,
+      ));
+      result.addAll(otherProjectNotBlueprintCacheObjectList);
+      newLimit -= otherProjectNotBlueprintCacheObjectList.length;
+      if (newLimit > 0) {
+        List<CacheObject> otherProjectBlueprintCacheObjectList = CacheObject.fromMapList(await db!.query(
+          _tableCacheObject,
+          columns: null,
+          orderBy: '${CacheObject.columnTouched} ASC',
+          where: '${CacheObject.columnProjectId} != ? AND ${CacheObject.columnType} = ?',
+          whereArgs: [projectId, CacheObjectType.blueprint.index],
+          limit: newLimit,
+        ));
+        result.addAll(otherProjectBlueprintCacheObjectList);
+      }
+    }
+    return result;
   }
 
+  /// For the wakecap cache manager, objects that are old should be picked where the type is other
   @override
-  Future<List<CacheObject>> getOldObjects(Duration maxAge) async {
+  Future<List<CacheObject>> getOldObjects({required Duration maxAge}) async {
     return CacheObject.fromMapList(await db!.query(
       _tableCacheObject,
-      where: '${CacheObject.columnTouched} < ?',
+      where: '${CacheObject.columnTouched} < ? AND ${CacheObject.columnType} = ?',
       columns: null,
-      whereArgs: [DateTime.now().subtract(maxAge).millisecondsSinceEpoch],
+      whereArgs: [DateTime.now().subtract(maxAge).millisecondsSinceEpoch, CacheObjectType.other.index],
       limit: 100,
     ));
   }

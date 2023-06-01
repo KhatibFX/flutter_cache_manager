@@ -26,8 +26,7 @@ mixin ImageCacheManager on BaseCacheManager {
     int? maxWidth,
   }) async* {
     if (maxHeight == null && maxWidth == null) {
-      yield* getFileStream(url,
-          key: key, headers: headers, withProgress: withProgress);
+      yield* getFileStream(url, key: key, headers: headers, withProgress: withProgress);
       return;
     }
     key ??= url;
@@ -39,7 +38,7 @@ mixin ImageCacheManager on BaseCacheManager {
     var fromCache = await getFileFromCache(resizedKey);
     if (fromCache != null) {
       yield fromCache;
-      if (fromCache.validTill.isAfter(DateTime.now())) {
+      if (fromCache.validTill == null || fromCache.validTill!.isAfter(DateTime.now())) {
         return;
       }
       withProgress = false;
@@ -92,13 +91,9 @@ mixin ImageCacheManager on BaseCacheManager {
       maxHeight = (image.height / resizeFactor).round();
     }
 
-    var resized = await _decodeImage(originalFile.file,
-        width: maxWidth, height: maxHeight, allowUpscaling: false);
-    var resizedFile =
-        (await resized.toByteData(format: ui.ImageByteFormat.png))!
-            .buffer
-            .asUint8List();
-    var maxAge = originalFile.validTill.difference(DateTime.now());
+    var resized = await _decodeImage(originalFile.file, width: maxWidth, height: maxHeight, allowUpscaling: false);
+    var resizedFile = (await resized.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List();
+    var maxAge = originalFile.validTill?.difference(DateTime.now());
 
     var file = await putFile(
       originalFile.originalUrl,
@@ -146,18 +141,14 @@ mixin ImageCacheManager on BaseCacheManager {
   }
 }
 
-Future<ui.Image> _decodeImage(File file,
-    {int? width, int? height, bool allowUpscaling = false}) {
+Future<ui.Image> _decodeImage(File file, {int? width, int? height, bool allowUpscaling = false}) {
   var shouldResize = width != null || height != null;
   var fileImage = FileImage(file);
   final image = shouldResize
-      ? ResizeImage(fileImage,
-          width: width, height: height, allowUpscaling: allowUpscaling)
+      ? ResizeImage(fileImage, width: width, height: height, allowUpscaling: allowUpscaling)
       : fileImage as ImageProvider;
   final completer = Completer<ui.Image>();
-  image
-      .resolve(const ImageConfiguration())
-      .addListener(ImageStreamListener((info, _) {
+  image.resolve(const ImageConfiguration()).addListener(ImageStreamListener((info, _) {
     completer.complete(info.image);
     image.evict();
   }));

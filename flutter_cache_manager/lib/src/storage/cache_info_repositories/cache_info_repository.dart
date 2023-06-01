@@ -15,8 +15,7 @@ abstract class CacheInfoRepository {
   Future<dynamic> updateOrInsert(CacheObject cacheObject);
 
   /// Inserts [cacheObject] into the repository
-  Future<CacheObject> insert(CacheObject cacheObject,
-      {bool setTouchedToNow = true});
+  Future<CacheObject> insert(CacheObject cacheObject, {bool setTouchedToNow = true});
 
   /// Gets a [CacheObject] by [key]
   Future<CacheObject?> get(String key);
@@ -37,13 +36,13 @@ abstract class CacheInfoRepository {
   ///
   /// The exact implementation is up to the repository, but implementations should
   /// return a preferred list of items. For example, the least recently accessed
-  Future<List<CacheObject>> getObjectsOverCapacity(int capacity);
+  Future<List<CacheObject>> getObjectsOverCapacity({required int capacity, required String projectId});
 
   /// Returns a list of [CacheObject] that are older than [maxAge]
-  Future<List<CacheObject>> getOldObjects(Duration maxAge);
+  Future<List<CacheObject>> getOldObjects({required Duration maxAge});
 
   /// Close the connection to the repository. If this is the last connection
-  /// to the repository it will return true and the repository is trully
+  /// to the repository it will return true and the repository is truly
   /// closed. If there are still open connections it will return false;
   Future<bool> close();
 
@@ -60,8 +59,7 @@ extension MigrationExtension on CacheInfoRepository {
     await _putAll(cacheObjects);
     var isClosed = await previousRepository.close();
     if (!isClosed) {
-      cacheLogger.log('Deleting an open repository while migrating.',
-          CacheManagerLogLevel.warning);
+      cacheLogger.log('Deleting an open repository while migrating.', CacheManagerLogLevel.warning);
     }
     await previousRepository.deleteDataFile();
   }

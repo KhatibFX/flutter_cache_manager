@@ -10,8 +10,7 @@ class FileServiceCompat extends FileService {
   FileServiceCompat(this.fileFetcher);
 
   @override
-  Future<FileServiceResponse> get(String url,
-      {Map<String, String>? headers}) async {
+  Future<FileServiceResponse> get(String url, {Map<String, String>? headers}) async {
     var legacyResponse = await fileFetcher(url, headers: headers);
     return CompatFileServiceGetResponse(legacyResponse);
   }
@@ -34,9 +33,9 @@ class CompatFileServiceGetResponse implements FileServiceResponse {
   int get contentLength => legacyResponse.bodyBytes.length;
 
   @override
-  DateTime get validTill {
-    // Without a cache-control header we keep the file for a week
-    var ageDuration = const Duration(days: 7);
+  DateTime? get validTill {
+    // Without a cache-control header we keep the file for 30 days
+    Duration? ageDuration;
     final cacheControl = _header(HttpHeaders.cacheControlHeader);
     if (cacheControl != null) {
       final controlSettings = cacheControl.split(',');
@@ -54,7 +53,7 @@ class CompatFileServiceGetResponse implements FileServiceResponse {
       }
     }
 
-    return _receivedTime.add(ageDuration);
+    return ageDuration != null ? _receivedTime.add(ageDuration) : null;
   }
 
   @override

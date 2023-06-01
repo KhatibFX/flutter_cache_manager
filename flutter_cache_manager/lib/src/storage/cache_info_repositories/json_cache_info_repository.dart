@@ -12,8 +12,7 @@ import 'package:path_provider/path_provider.dart';
 import 'cache_info_repository.dart';
 import 'helper_methods.dart';
 
-class JsonCacheInfoRepository extends CacheInfoRepository
-    with CacheInfoRepositoryHelperMethods {
+class JsonCacheInfoRepository extends CacheInfoRepository with CacheInfoRepositoryHelperMethods {
   Directory? directory;
   String? path;
   String? databaseName;
@@ -21,8 +20,7 @@ class JsonCacheInfoRepository extends CacheInfoRepository
   /// Either the path or the database name should be provided.
   /// If the path is provider it should end with '{databaseName}.json',
   /// for example: /data/user/0/com.example.example/databases/imageCache.json
-  JsonCacheInfoRepository({this.path, this.databaseName})
-      : assert(path == null || databaseName == null);
+  JsonCacheInfoRepository({this.path, this.databaseName}) : assert(path == null || databaseName == null);
 
   /// The directory and the databaseName should both the provided. The database
   /// is stored as {databaseName}.json in the directory,
@@ -87,16 +85,16 @@ class JsonCacheInfoRepository extends CacheInfoRepository
     return cacheObject.id == null ? insert(cacheObject) : update(cacheObject);
   }
 
+  /// This method is only called on web, so we don't need to consider modifying it
   @override
-  Future<List<CacheObject>> getObjectsOverCapacity(int capacity) async {
-    var allSorted = _cacheObjects.values.toList()
-      ..sort((c1, c2) => c1.touched!.compareTo(c2.touched!));
+  Future<List<CacheObject>> getObjectsOverCapacity({required int capacity, required String projectId}) async {
+    var allSorted = _cacheObjects.values.toList()..sort((c1, c2) => c1.touched!.compareTo(c2.touched!));
     if (allSorted.length <= capacity) return [];
     return allSorted.getRange(0, allSorted.length - capacity).toList();
   }
 
   @override
-  Future<List<CacheObject>> getOldObjects(Duration maxAge) async {
+  Future<List<CacheObject>> getOldObjects({required Duration maxAge}) async {
     var oldestTimestamp = DateTime.now().subtract(maxAge);
     return _cacheObjects.values
         .where(

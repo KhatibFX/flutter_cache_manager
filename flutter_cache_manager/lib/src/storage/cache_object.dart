@@ -1,5 +1,12 @@
 import 'package:clock/clock.dart';
 
+enum CacheObjectType {
+  other,
+  blueprint,
+  resourceUploadedPhoto,
+  resourceUploadedSignature,
+}
+
 ///Flutter Cache Manager
 ///Copyright (c) 2019 Rene Floor
 ///Released under MIT License.
@@ -14,6 +21,8 @@ class CacheObject {
   static const columnValidTill = 'validTill';
   static const columnTouched = 'touched';
   static const columnLength = 'length';
+  static const columnProjectId = 'projectId';
+  static const columnType = 'type';
 
   CacheObject(
     this.url, {
@@ -24,6 +33,8 @@ class CacheObject {
     this.id,
     this.length,
     this.touched,
+    this.projectId,
+    this.type = CacheObjectType.other,
   }) : key = key ?? url;
 
   CacheObject.fromMap(Map<String, dynamic> map)
@@ -32,11 +43,12 @@ class CacheObject {
         key = map[columnKey] as String? ?? map[columnUrl] as String,
         relativePath = map[columnPath] as String,
         validTill =
-            DateTime.fromMillisecondsSinceEpoch(map[columnValidTill] as int),
+            map[columnValidTill] != null ? DateTime.fromMillisecondsSinceEpoch(map[columnValidTill] as int) : null,
         eTag = map[columnETag] as String?,
         length = map[columnLength] as int?,
-        touched =
-            DateTime.fromMillisecondsSinceEpoch(map[columnTouched] as int);
+        touched = DateTime.fromMillisecondsSinceEpoch(map[columnTouched] as int),
+        projectId = map[columnProjectId] as String?,
+        type = map[columnType] != null ? CacheObjectType.values[map[columnType] as int] : CacheObjectType.other;
 
   /// Internal ID used to represent this cache object
   final int? id;
@@ -53,7 +65,7 @@ class CacheObject {
   final String relativePath;
 
   /// When this cached item becomes invalid
-  final DateTime validTill;
+  final DateTime? validTill;
 
   /// eTag provided by the server for cache expiry
   final String? eTag;
@@ -64,18 +76,24 @@ class CacheObject {
   /// When the file is last used
   final DateTime? touched;
 
+  /// The project ID the object belongs to
+  final String? projectId;
+
+  /// The cache object type
+  final CacheObjectType type;
+
   Map<String, dynamic> toMap({bool setTouchedToNow = true}) {
     final map = <String, dynamic>{
       columnUrl: url,
       columnKey: key,
       columnPath: relativePath,
       columnETag: eTag,
-      columnValidTill: validTill.millisecondsSinceEpoch,
-      columnTouched:
-          (setTouchedToNow ? clock.now() : touched)?.millisecondsSinceEpoch ??
-              0,
+      columnValidTill: validTill?.millisecondsSinceEpoch,
+      columnTouched: (setTouchedToNow ? clock.now() : touched)?.millisecondsSinceEpoch ?? 0,
       columnLength: length,
       if (id != null) columnId: id,
+      if (projectId != null) columnProjectId: projectId,
+      columnType: type.index,
     };
     return map;
   }
@@ -84,14 +102,15 @@ class CacheObject {
     return list.map((map) => CacheObject.fromMap(map)).toList();
   }
 
-  CacheObject copyWith({
-    String? url,
-    int? id,
-    String? relativePath,
-    DateTime? validTill,
-    String? eTag,
-    int? length,
-  }) {
+  CacheObject copyWith(
+      {String? url,
+      int? id,
+      String? relativePath,
+      DateTime? validTill,
+      String? eTag,
+      int? length,
+      String? projectId,
+      CacheObjectType? type}) {
     return CacheObject(
       url ?? this.url,
       id: id ?? this.id,
@@ -100,6 +119,8 @@ class CacheObject {
       validTill: validTill ?? this.validTill,
       eTag: eTag ?? this.eTag,
       length: length ?? this.length,
+      projectId: projectId ?? this.projectId,
+      type: type ?? this.type,
       touched: touched,
     );
   }
