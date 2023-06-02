@@ -36,7 +36,7 @@ class WebHelper {
       {String? key,
       Map<String, String>? authHeaders,
       bool ignoreMemCache = false,
-      String? projectId,
+      required String? projectId,
       CacheObjectType? type}) {
     key ??= url;
     var subject = _memCache[key];

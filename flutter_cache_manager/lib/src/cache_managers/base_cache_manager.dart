@@ -14,18 +14,16 @@ abstract class BaseCacheManager {
   /// When a file is cached it is return directly, when it is too old the file is
   /// downloaded in the background. When a cached file is not available the
   /// newly downloaded file is returned.
-  Future<File> getSingleFile(
-    String url, {
-    String key,
-    Map<String, String> headers,
-  });
+  Future<File> getSingleFile(String url,
+      {String key, Map<String, String> headers, String? projectId, CacheObjectType? type});
 
   /// Get the file from the cache and/or online, depending on availability and age.
   /// Downloaded form [url], [headers] can be used for example for authentication.
   /// The files are returned as stream. First the cached file if available, when the
   /// cached file is too old the newly downloaded file is returned afterwards.
   @Deprecated('Prefer to use the new getFileStream method')
-  Stream<FileInfo> getFile(String url, {String key, Map<String, String> headers});
+  Stream<FileInfo> getFile(String url,
+      {String key, Map<String, String> headers, String? projectId, CacheObjectType? type});
 
   /// Get the file from the cache and/or online, depending on availability and age.
   /// Downloaded form [url], [headers] can be used for example for authentication.
@@ -38,10 +36,12 @@ abstract class BaseCacheManager {
   /// set on true and the file is not available in the cache. When the file is
   /// returned from the cache there will be no progress given, although the file
   /// might be outdated and a new file is being downloaded in the background.
-  Stream<FileResponse> getFileStream(String url, {String? key, Map<String, String>? headers, bool withProgress});
+  Stream<FileResponse> getFileStream(String url,
+      {String? key, Map<String, String>? headers, bool withProgress, String? projectId, CacheObjectType? type});
 
   ///Download the file and add to cache
-  Future<FileInfo> downloadFile(String url, {String? key, Map<String, String>? authHeaders, bool force = false});
+  Future<FileInfo> downloadFile(String url,
+      {String? key, Map<String, String>? authHeaders, bool force = false, String? projectId, CacheObjectType? type});
 
   /// Get the file from the cache.
   /// Specify [ignoreMemCache] to force a re-read from the database

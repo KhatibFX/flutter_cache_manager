@@ -28,7 +28,8 @@ mixin ImageCacheManager on BaseCacheManager {
     CacheObjectType? type,
   }) async* {
     if (maxHeight == null && maxWidth == null) {
-      yield* getFileStream(url, key: key, headers: headers, withProgress: withProgress);
+      yield* getFileStream(url,
+          key: key, headers: headers, withProgress: withProgress, projectId: projectId, type: type);
       return;
     }
     key ??= url;
@@ -135,6 +136,8 @@ mixin ImageCacheManager on BaseCacheManager {
       key: originalKey,
       headers: headers,
       withProgress: withProgress,
+      projectId: projectId,
+      type: type,
     )) {
       if (response is DownloadProgress) {
         yield response;

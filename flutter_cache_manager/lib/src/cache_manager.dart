@@ -69,17 +69,14 @@ class CacheManager implements BaseCacheManager {
   /// file is too old the file is downloaded and returned after download.
   /// When a cached file is not available the newly downloaded file is returned.
   @override
-  Future<File> getSingleFile(
-    String url, {
-    String? key,
-    Map<String, String>? headers,
-  }) async {
+  Future<File> getSingleFile(String url,
+      {String? key, Map<String, String>? headers, String? projectId, CacheObjectType? type}) async {
     key ??= url;
     final cacheFile = await getFileFromCache(key);
     if (cacheFile != null && (cacheFile.validTill == null || cacheFile.validTill!.isAfter(DateTime.now()))) {
       return cacheFile.file;
     }
-    return (await downloadFile(url, key: key, authHeaders: headers)).file;
+    return (await downloadFile(url, key: key, authHeaders: headers, projectId: projectId, type: type)).file;
   }
 
   /// Get the file from the cache and/or online, depending on availability and age.
@@ -88,11 +85,14 @@ class CacheManager implements BaseCacheManager {
   /// cached file is too old the newly downloaded file is returned afterwards.
   @override
   @Deprecated('Prefer to use the new getFileStream method')
-  Stream<FileInfo> getFile(String url, {String? key, Map<String, String>? headers}) {
+  Stream<FileInfo> getFile(String url,
+      {String? key, Map<String, String>? headers, String? projectId, CacheObjectType? type}) {
     return getFileStream(
       url,
       key: key,
       withProgress: false,
+      projectId: projectId,
+      type: type,
     ).where((r) => r is FileInfo).cast<FileInfo>();
   }
 
@@ -109,15 +109,20 @@ class CacheManager implements BaseCacheManager {
   /// might be outdated and a new file is being downloaded in the background.
   @override
   Stream<FileResponse> getFileStream(String url,
-      {String? key, Map<String, String>? headers, bool withProgress = false}) {
+      {String? key,
+      Map<String, String>? headers,
+      bool withProgress = false,
+      String? projectId,
+      CacheObjectType? type}) {
     key ??= url;
     final streamController = StreamController<FileResponse>();
-    _pushFileToStream(streamController, url, key, headers, withProgress);
+    _pushFileToStream(streamController, url, key, headers, withProgress, projectId: projectId, type: type);
     return streamController.stream;
   }
 
-  Future<void> _pushFileToStream(StreamController streamController, String url, String? key,
-      Map<String, String>? headers, bool withProgress) async {
+  Future<void> _pushFileToStream(
+      StreamController streamController, String url, String? key, Map<String, String>? headers, bool withProgress,
+      {required String? projectId, CacheObjectType? type}) async {
     key ??= url;
     FileInfo? cacheFile;
     try {
@@ -131,7 +136,8 @@ class CacheManager implements BaseCacheManager {
     }
     if (cacheFile == null || (cacheFile.validTill != null && cacheFile.validTill!.isBefore(DateTime.now()))) {
       try {
-        await for (var response in _webHelper.downloadFile(url, key: key, authHeaders: headers)) {
+        await for (var response
+            in _webHelper.downloadFile(url, key: key, authHeaders: headers, projectId: projectId, type: type)) {
           if (response is DownloadProgress && withProgress) {
             streamController.add(response);
           }
@@ -151,7 +157,12 @@ class CacheManager implements BaseCacheManager {
 
   ///Download the file and add to cache
   @override
-  Future<FileInfo> downloadFile(String url, {String? key, Map<String, String>? authHeaders, bool force = false}) async {
+  Future<FileInfo> downloadFile(String url,
+      {String? key,
+      Map<String, String>? authHeaders,
+      bool force = false,
+      String? projectId,
+      CacheObjectType? type}) async {
     key ??= url;
     var fileResponse = await _webHelper
         .downloadFile(
@@ -159,6 +170,8 @@ class CacheManager implements BaseCacheManager {
           key: key,
           authHeaders: authHeaders,
           ignoreMemCache: force,
+          projectId: projectId,
+          type: type,
         )
         .firstWhere((r) => r is FileInfo);
     return fileResponse as FileInfo;
