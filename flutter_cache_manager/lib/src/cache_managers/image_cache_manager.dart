@@ -24,6 +24,8 @@ mixin ImageCacheManager on BaseCacheManager {
     bool withProgress = false,
     int? maxHeight,
     int? maxWidth,
+    String? projectId,
+    CacheObjectType? type,
   }) async* {
     if (maxHeight == null && maxWidth == null) {
       yield* getFileStream(url, key: key, headers: headers, withProgress: withProgress);
@@ -53,6 +55,8 @@ mixin ImageCacheManager on BaseCacheManager {
         withProgress,
         maxWidth: maxWidth,
         maxHeight: maxHeight,
+        projectId: projectId,
+        type: type,
       ).asBroadcastStream();
       _runningResizes[resizedKey] = runningResize;
     }
@@ -67,6 +71,8 @@ mixin ImageCacheManager on BaseCacheManager {
     String key,
     int? maxWidth,
     int? maxHeight,
+    String? projectId,
+    CacheObjectType? type,
   ) async {
     var originalFileName = originalFile.file.path;
     var fileExtension = originalFileName.split('.').last;
@@ -101,6 +107,8 @@ mixin ImageCacheManager on BaseCacheManager {
       key: key,
       maxAge: maxAge,
       fileExtension: fileExtension,
+      projectId: projectId,
+      type: type,
     );
 
     return FileInfo(
@@ -119,6 +127,8 @@ mixin ImageCacheManager on BaseCacheManager {
     bool withProgress, {
     int? maxWidth,
     int? maxHeight,
+    String? projectId,
+    CacheObjectType? type,
   }) async* {
     await for (var response in getFileStream(
       url,
@@ -135,6 +145,8 @@ mixin ImageCacheManager on BaseCacheManager {
           resizedKey,
           maxWidth,
           maxHeight,
+          projectId,
+          type,
         );
       }
     }

@@ -12,6 +12,7 @@ class Config implements def.Config {
     this.cacheKey, {
     Duration? stalePeriod,
     int? maxNrOfCacheObjects,
+    int? maxConcurrentRequests,
     CacheInfoRepository? repo,
     FileSystem? fileSystem,
     FileService? fileService,
@@ -19,6 +20,7 @@ class Config implements def.Config {
     required this.onRemoved,
   })  : stalePeriod = stalePeriod ?? const Duration(days: 30),
         maxNrOfCacheObjects = maxNrOfCacheObjects ?? 200,
+        maxConcurrentRequests = maxConcurrentRequests ?? 10,
         repo = repo ?? _createRepo(cacheKey),
         fileSystem = fileSystem ?? IOFileSystem(cacheKey),
         fileService = fileService ?? HttpFileService();
@@ -37,6 +39,9 @@ class Config implements def.Config {
 
   @override
   final int maxNrOfCacheObjects;
+
+  @override
+  final int maxConcurrentRequests;
 
   @override
   final FileService fileService;

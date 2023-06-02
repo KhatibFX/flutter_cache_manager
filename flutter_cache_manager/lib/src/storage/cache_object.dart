@@ -80,7 +80,7 @@ class CacheObject {
   final String? projectId;
 
   /// The cache object type
-  final CacheObjectType type;
+  final CacheObjectType? type;
 
   Map<String, dynamic> toMap({bool setTouchedToNow = true}) {
     final map = <String, dynamic>{
@@ -93,7 +93,7 @@ class CacheObject {
       columnLength: length,
       if (id != null) columnId: id,
       if (projectId != null) columnProjectId: projectId,
-      columnType: type.index,
+      columnType: type?.index,
     };
     return map;
   }

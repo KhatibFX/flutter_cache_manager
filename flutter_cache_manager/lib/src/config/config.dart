@@ -29,6 +29,7 @@ abstract class Config {
     String cacheKey, {
     Duration stalePeriod,
     int maxNrOfCacheObjects,
+    int maxConcurrentRequests,
     CacheInfoRepository repo,
     FileSystem fileSystem,
     FileService fileService,
@@ -43,5 +44,6 @@ abstract class Config {
   FileSystem get fileSystem;
   FileService get fileService;
   String? get projectId;
+  int get maxConcurrentRequests;
   Function({required List<CacheObject> cacheObjects})? get onRemoved;
 }

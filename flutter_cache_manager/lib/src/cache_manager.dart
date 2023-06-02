@@ -1,11 +1,9 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:file/file.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_cache_manager/src/cache_store.dart';
-import 'package:flutter_cache_manager/src/storage/cache_object.dart';
 import 'package:flutter_cache_manager/src/web/web_helper.dart';
 import 'package:uuid/uuid.dart';
 
@@ -33,7 +31,8 @@ class CacheManager implements BaseCacheManager {
   CacheManager(Config config)
       : _config = config,
         _store = CacheStore(config) {
-    _webHelper = WebHelper(_store, config.fileService);
+    _webHelper =
+        WebHelper(store: _store, fileFetcher: config.fileService, maxConcurrentRequests: config.maxConcurrentRequests);
   }
 
   @visibleForTesting
@@ -43,7 +42,8 @@ class CacheManager implements BaseCacheManager {
     WebHelper? webHelper,
   })  : _config = config,
         _store = cacheStore ?? CacheStore(config) {
-    _webHelper = webHelper ?? WebHelper(_store, config.fileService);
+    _webHelper = webHelper ??
+        WebHelper(store: _store, fileFetcher: config.fileService, maxConcurrentRequests: config.maxConcurrentRequests);
   }
 
   final Config _config;
@@ -238,6 +238,8 @@ class CacheManager implements BaseCacheManager {
     cacheObject = cacheObject.copyWith(
       validTill: maxAge != null ? DateTime.now().add(maxAge) : null,
       eTag: eTag,
+      projectId: projectId,
+      type: type,
     );
 
     var file = await _config.fileSystem.createFile(cacheObject.relativePath);
