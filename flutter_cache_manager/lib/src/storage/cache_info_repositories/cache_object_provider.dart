@@ -212,7 +212,7 @@ class CacheObjectProvider extends CacheInfoRepository with CacheInfoRepositoryHe
             limit: newLimit,
           ));
           debugPrint(
-              "Number of deletable other objects from this project: ${otherProjectBlueprintCacheObjectList.length}");
+              "Number of deletable other objects from this project: ${currentProjectOtherCacheObjectList.length}");
           result.addAll(currentProjectOtherCacheObjectList);
         }
       }
