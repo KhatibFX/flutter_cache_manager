@@ -38,7 +38,7 @@ class CacheObjectProvider extends CacheInfoRepository with CacheInfoRepositoryHe
         ${CacheObject.columnValidTill} integer,
         ${CacheObject.columnTouched} integer,
         ${CacheObject.columnLength} integer,
-        ${CacheObject.columnProjectId} text
+        ${CacheObject.columnProjectId} text,
         ${CacheObject.columnType} integer
         );
         create unique index $_tableCacheObject${CacheObject.columnKey}
