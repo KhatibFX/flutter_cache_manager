@@ -1,6 +1,5 @@
 import 'package:flutter_cache_manager/src/storage/cache_info_repositories/cache_info_repository.dart';
 import 'package:flutter_cache_manager/src/storage/cache_info_repositories/non_storing_object_provider.dart';
-import 'package:flutter_cache_manager/src/storage/cache_object.dart';
 import 'package:flutter_cache_manager/src/storage/file_system/file_system.dart';
 import 'package:flutter_cache_manager/src/storage/file_system/file_system_web.dart';
 import 'package:flutter_cache_manager/src/web/file_service.dart';
@@ -16,8 +15,6 @@ class Config implements def.Config {
     CacheInfoRepository? repo,
     FileSystem? fileSystem,
     FileService? fileService,
-    this.projectId,
-    this.onRemoved,
   })  : stalePeriod = stalePeriod ?? const Duration(days: 30),
         maxNrOfCacheObjects = maxNrOfCacheObjects ?? 200,
         maxConcurrentRequests = maxConcurrentRequests ?? 10,
@@ -44,11 +41,5 @@ class Config implements def.Config {
   final FileService fileService;
 
   @override
-  final String? projectId;
-
-  @override
   final int maxConcurrentRequests;
-
-  @override
-  final Function({required List<CacheObject> cacheObjects})? onRemoved;
 }

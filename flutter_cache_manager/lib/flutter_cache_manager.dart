@@ -1,6 +1,7 @@
 export 'src/cache_manager.dart';
 export 'src/cache_managers/cache_managers.dart';
 export 'src/compat/file_fetcher.dart';
+export 'src/config/additional_config.dart';
 export 'src/config/config.dart';
 export 'src/logger.dart';
 export 'src/result/result.dart';

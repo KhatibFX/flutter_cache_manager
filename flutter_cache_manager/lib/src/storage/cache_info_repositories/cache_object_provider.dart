@@ -170,7 +170,7 @@ class CacheObjectProvider extends CacheInfoRepository with CacheInfoRepositoryHe
       columns: null,
       orderBy: '${CacheObject.columnTouched} DESC',
       where: '${CacheObject.columnTouched} < ?',
-      whereArgs: [DateTime.now().subtract(const Duration(days: 1)).millisecondsSinceEpoch],
+      whereArgs: [DateTime.now().millisecondsSinceEpoch],
       limit: 100,
       offset: capacity,
     ));

@@ -1,5 +1,4 @@
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:flutter_cache_manager/src/storage/cache_object.dart';
 import 'package:flutter_cache_manager/src/storage/file_system/file_system.dart';
 
 import '_config_unsupported.dart' if (dart.library.html) '_config_web.dart' if (dart.library.io) '_config_io.dart'
@@ -33,8 +32,6 @@ abstract class Config {
     CacheInfoRepository repo,
     FileSystem fileSystem,
     FileService fileService,
-    String? projectId,
-    Function({required List<CacheObject> cacheObjects})? onRemoved,
   }) = impl.Config;
 
   String get cacheKey;
@@ -43,7 +40,5 @@ abstract class Config {
   CacheInfoRepository get repo;
   FileSystem get fileSystem;
   FileService get fileService;
-  String? get projectId;
   int get maxConcurrentRequests;
-  Function({required List<CacheObject> cacheObjects})? get onRemoved;
 }

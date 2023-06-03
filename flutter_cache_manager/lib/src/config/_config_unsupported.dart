@@ -1,5 +1,4 @@
 import 'package:flutter_cache_manager/src/storage/cache_info_repositories/cache_info_repository.dart';
-import 'package:flutter_cache_manager/src/storage/cache_object.dart';
 import 'package:flutter_cache_manager/src/storage/file_system/file_system.dart';
 import 'package:flutter_cache_manager/src/web/file_service.dart';
 
@@ -14,7 +13,7 @@ class Config implements def.Config {
     Duration? stalePeriod,
     //ignore: avoid_unused_constructor_parameters
     int? maxNrOfCacheObjects,
-//ignore: avoid_unused_constructor_parameters
+    //ignore: avoid_unused_constructor_parameters
     int? maxConcurrentRequests,
     //ignore: avoid_unused_constructor_parameters
     CacheInfoRepository? repo,
@@ -22,10 +21,6 @@ class Config implements def.Config {
     FileSystem? fileSystem,
     //ignore: avoid_unused_constructor_parameters
     FileService? fileService,
-    //ignore: avoid_unused_constructor_parameters
-    String? projectId,
-    //ignore: avoid_unused_constructor_parameters
-    Function({required List<CacheObject> cacheObjects})? onRemoved,
   }) {
     throw UnsupportedError('Platform is not supported');
   }
@@ -50,10 +45,4 @@ class Config implements def.Config {
 
   @override
   FileService get fileService => throw UnimplementedError();
-
-  @override
-  String? get projectId => throw UnimplementedError();
-
-  @override
-  Function({required List<CacheObject> cacheObjects})? get onRemoved => throw UnimplementedError();
 }

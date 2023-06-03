@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:file/file.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_cache_manager/src/storage/cache_object.dart';
 
 import '../result/file_info.dart';
@@ -84,6 +85,9 @@ abstract class BaseCacheManager {
 
   /// Removes all files from the cache
   Future<void> emptyCache();
+
+  /// sets additional config used when cleaning up the cache
+  void setAdditionalConfig(AdditionalConfig additionalConfig);
 
   /// Closes the cache database
   Future<void> dispose();

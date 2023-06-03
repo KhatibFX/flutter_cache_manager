@@ -17,12 +17,13 @@ class CacheStore {
   FileSystem fileSystem;
 
   final Config _config;
+  AdditionalConfig? _additionalConfig;
   String get storeKey => _config.cacheKey;
   final Future<CacheInfoRepository> _cacheInfoRepository;
   int get _capacity => _config.maxNrOfCacheObjects;
   Duration get _maxAge => _config.stalePeriod;
-  String? get _projectId => _config.projectId;
-  Function({required List<CacheObject> cacheObjects})? get _onRemoved => _config.onRemoved;
+  String? get _projectId => _additionalConfig?.projectId;
+  Function({required List<CacheObject> cacheObjects})? get _onRemoved => _additionalConfig?.onRemoved;
 
   DateTime lastCleanupRun = DateTime.now();
   Timer? _scheduledCleanup;
@@ -31,6 +32,10 @@ class CacheStore {
       : _config = config,
         fileSystem = config.fileSystem,
         _cacheInfoRepository = config.repo.open().then((value) => config.repo);
+
+  set additionalConfig(AdditionalConfig additionalConfig) {
+    _additionalConfig = additionalConfig;
+  }
 
   Future<FileInfo?> getFile(String key, {bool ignoreMemCache = false}) async {
     final cacheObject = await retrieveCacheData(key, ignoreMemCache: ignoreMemCache);

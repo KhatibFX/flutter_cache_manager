@@ -281,6 +281,12 @@ class CacheManager implements BaseCacheManager {
   @override
   Future<void> emptyCache() => _store.emptyCache();
 
+  /// Sets the additional config used when cleaning up the cache
+  @override
+  void setAdditionalConfig(AdditionalConfig additionalConfig) {
+    _store.additionalConfig = additionalConfig;
+  }
+
   /// Closes the cache database
   @override
   Future<void> dispose() async {
