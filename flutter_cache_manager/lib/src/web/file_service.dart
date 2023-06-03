@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:clock/clock.dart';
-import 'package:flutter_cache_manager/src/web/isolate_helper.dart';
 import 'package:http/http.dart' as http;
 
 import 'mime_converter.dart';
@@ -36,38 +35,6 @@ class HttpFileService extends FileService {
 
     return HttpGetResponse(httpResponse);
   }
-}
-
-/// [HttpIsolateFileService] is an extended version of [HttpFileService] which
-/// uses an isolate to download the file.
-class HttpIsolateFileService extends FileService {
-  final http.Client _httpClient;
-
-  HttpIsolateFileService({http.Client? httpClient}) : _httpClient = httpClient ?? http.Client();
-
-  @override
-  Future<FileServiceResponse> get(String url, {Map<String, String>? headers}) async {
-    FileServiceResponse fileServiceResponse =
-        await initializeGenericIsolate<FileServiceResponse>(initializeInternalFunction: _getInternal, params: [
-      _httpClient,
-      url,
-      headers,
-    ]);
-    return fileServiceResponse;
-  }
-}
-
-Future<FileServiceResponse> _getInternal(List<dynamic> args) async {
-  http.Client httpClient = args[0];
-  String url = args[1];
-  Map<String, String>? headers = args[2];
-  final req = http.Request('GET', Uri.parse(url));
-  if (headers != null) {
-    req.headers.addAll(headers);
-  }
-  final httpResponse = await httpClient.send(req);
-
-  return HttpGetResponse(httpResponse);
 }
 
 /// Defines the interface for a get result of a [FileService].
