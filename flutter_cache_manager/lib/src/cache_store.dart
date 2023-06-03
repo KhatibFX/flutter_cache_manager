@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_cache_manager/src/storage/file_system/file_system.dart';
 
 import '../flutter_cache_manager.dart';
@@ -134,6 +135,8 @@ class CacheStore {
   }
 
   Future<void> _cleanupCache() async {
+    debugPrint("Running cleanup. Current project ID is $_projectId");
+
     final toRemove = <int>[];
     final provider = await _cacheInfoRepository;
 
