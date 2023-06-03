@@ -25,11 +25,15 @@ mixin ImageCacheManager on BaseCacheManager {
     int? maxHeight,
     int? maxWidth,
     String? projectId,
-    CacheObjectType? type,
+    CacheObjectType? cacheObjectType,
   }) async* {
     if (maxHeight == null && maxWidth == null) {
       yield* getFileStream(url,
-          key: key, headers: headers, withProgress: withProgress, projectId: projectId, type: type);
+          key: key,
+          headers: headers,
+          withProgress: withProgress,
+          projectId: projectId,
+          cacheObjectType: cacheObjectType);
       return;
     }
     key ??= url;
@@ -57,7 +61,7 @@ mixin ImageCacheManager on BaseCacheManager {
         maxWidth: maxWidth,
         maxHeight: maxHeight,
         projectId: projectId,
-        type: type,
+        cacheObjectType: cacheObjectType,
       ).asBroadcastStream();
       _runningResizes[resizedKey] = runningResize;
     }
@@ -73,7 +77,7 @@ mixin ImageCacheManager on BaseCacheManager {
     int? maxWidth,
     int? maxHeight,
     String? projectId,
-    CacheObjectType? type,
+    CacheObjectType? cacheObjectType,
   ) async {
     var originalFileName = originalFile.file.path;
     var fileExtension = originalFileName.split('.').last;
@@ -109,7 +113,7 @@ mixin ImageCacheManager on BaseCacheManager {
       maxAge: maxAge,
       fileExtension: fileExtension,
       projectId: projectId,
-      type: type,
+      cacheObjectType: cacheObjectType,
     );
 
     return FileInfo(
@@ -129,7 +133,7 @@ mixin ImageCacheManager on BaseCacheManager {
     int? maxWidth,
     int? maxHeight,
     String? projectId,
-    CacheObjectType? type,
+    CacheObjectType? cacheObjectType,
   }) async* {
     await for (var response in getFileStream(
       url,
@@ -137,7 +141,7 @@ mixin ImageCacheManager on BaseCacheManager {
       headers: headers,
       withProgress: withProgress,
       projectId: projectId,
-      type: type,
+      cacheObjectType: cacheObjectType,
     )) {
       if (response is DownloadProgress) {
         yield response;
@@ -149,7 +153,7 @@ mixin ImageCacheManager on BaseCacheManager {
           maxWidth,
           maxHeight,
           projectId,
-          type,
+          cacheObjectType,
         );
       }
     }

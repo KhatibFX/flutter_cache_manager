@@ -37,23 +37,23 @@ class WebHelper {
       Map<String, String>? authHeaders,
       bool ignoreMemCache = false,
       required String? projectId,
-      CacheObjectType? type}) {
+      CacheObjectType? cacheObjectType}) {
     key ??= url;
     var subject = _memCache[key];
     if (subject == null || ignoreMemCache) {
       subject = BehaviorSubject<FileResponse>();
       _memCache[key] = subject;
-      unawaited(_downloadOrAddToQueue(url, key, authHeaders, projectId: projectId, type: type));
+      unawaited(_downloadOrAddToQueue(url, key, authHeaders, projectId: projectId, cacheObjectType: cacheObjectType));
     }
     return subject.stream;
   }
 
   var concurrentCalls = 0;
   Future<void> _downloadOrAddToQueue(String url, String key, Map<String, String>? authHeaders,
-      {String? projectId, CacheObjectType? type}) async {
+      {String? projectId, CacheObjectType? cacheObjectType}) async {
     //Add to queue if there are too many calls.
     if (concurrentCalls >= _maxConcurrentRequests) {
-      _queue.add(QueueItem(url, key, authHeaders, projectId: projectId, type: type));
+      _queue.add(QueueItem(url, key, authHeaders, projectId: projectId, cacheObjectType: cacheObjectType));
       return;
     }
     cacheLogger.log('CacheManager: Downloading $url', CacheManagerLogLevel.verbose);
@@ -61,7 +61,8 @@ class WebHelper {
     concurrentCalls++;
     var subject = _memCache[key]!;
     try {
-      await for (var result in _updateFile(url, key, authHeaders: authHeaders, projectId: projectId, type: type)) {
+      await for (var result
+          in _updateFile(url, key, authHeaders: authHeaders, projectId: projectId, cacheObjectType: cacheObjectType)) {
         subject.add(result);
       }
     } catch (e, stackTrace) {
@@ -77,12 +78,13 @@ class WebHelper {
   void _checkQueue() {
     if (_queue.isEmpty) return;
     var next = _queue.removeFirst();
-    _downloadOrAddToQueue(next.url, next.key, next.headers, projectId: next.projectId, type: next.type);
+    _downloadOrAddToQueue(next.url, next.key, next.headers,
+        projectId: next.projectId, cacheObjectType: next.cacheObjectType);
   }
 
   ///Download the file from the url
   Stream<FileResponse> _updateFile(String url, String key,
-      {Map<String, String>? authHeaders, String? projectId, CacheObjectType? type}) async* {
+      {Map<String, String>? authHeaders, String? projectId, CacheObjectType? cacheObjectType}) async* {
     var cacheObject = await _store.retrieveCacheData(key);
     cacheObject = cacheObject == null
         ? CacheObject(
@@ -91,7 +93,7 @@ class WebHelper {
             validTill: clock.now(),
             relativePath: '${const Uuid().v1()}.file',
             projectId: projectId,
-            type: type,
+            cacheObjectType: cacheObjectType,
           )
         : cacheObject.copyWith(url: url);
     final response = await _download(cacheObject, authHeaders);

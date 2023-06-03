@@ -35,8 +35,9 @@ class CacheObject {
     this.length,
     this.touched,
     this.projectId,
-    this.type = CacheObjectType.other,
-  }) : key = key ?? url;
+    CacheObjectType? cacheObjectType,
+  })  : key = key ?? url,
+        cacheObjectType = cacheObjectType ?? CacheObjectType.other;
 
   CacheObject.fromMap(Map<String, dynamic> map)
       : id = map[columnId] as int,
@@ -49,7 +50,8 @@ class CacheObject {
         length = map[columnLength] as int?,
         touched = DateTime.fromMillisecondsSinceEpoch(map[columnTouched] as int),
         projectId = map[columnProjectId] as String?,
-        type = map[columnType] != null ? CacheObjectType.values[map[columnType] as int] : CacheObjectType.other;
+        cacheObjectType =
+            map[columnType] != null ? CacheObjectType.values[map[columnType] as int] : CacheObjectType.other;
 
   /// Internal ID used to represent this cache object
   final int? id;
@@ -81,7 +83,7 @@ class CacheObject {
   final String? projectId;
 
   /// The cache object type
-  final CacheObjectType? type;
+  final CacheObjectType cacheObjectType;
 
   Map<String, dynamic> toMap({bool setTouchedToNow = true}) {
     final map = <String, dynamic>{
@@ -94,7 +96,7 @@ class CacheObject {
       columnLength: length,
       if (id != null) columnId: id,
       if (projectId != null) columnProjectId: projectId,
-      columnType: type?.index,
+      columnType: cacheObjectType.index,
     };
     return map;
   }
@@ -111,7 +113,7 @@ class CacheObject {
       String? eTag,
       int? length,
       String? projectId,
-      CacheObjectType? type}) {
+      CacheObjectType? cacheObjectType}) {
     return CacheObject(
       url ?? this.url,
       id: id ?? this.id,
@@ -121,7 +123,7 @@ class CacheObject {
       eTag: eTag ?? this.eTag,
       length: length ?? this.length,
       projectId: projectId ?? this.projectId,
-      type: type ?? this.type,
+      cacheObjectType: cacheObjectType ?? this.cacheObjectType,
       touched: touched,
     );
   }

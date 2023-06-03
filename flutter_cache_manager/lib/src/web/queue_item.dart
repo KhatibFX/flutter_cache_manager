@@ -5,7 +5,7 @@ class QueueItem {
   final String key;
   final Map<String, String>? headers;
   final String? projectId;
-  final CacheObjectType? type;
+  final CacheObjectType? cacheObjectType;
 
-  QueueItem(this.url, this.key, this.headers, {this.projectId, this.type});
+  QueueItem(this.url, this.key, this.headers, {this.projectId, this.cacheObjectType});
 }
