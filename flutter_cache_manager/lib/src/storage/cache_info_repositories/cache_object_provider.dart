@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_cache_manager/src/storage/cache_info_repositories/helper_methods.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -169,12 +170,11 @@ class CacheObjectProvider extends CacheInfoRepository with CacheInfoRepositoryHe
       _tableCacheObject,
       columns: null,
       orderBy: '${CacheObject.columnTouched} DESC',
-      where: '${CacheObject.columnTouched} < ?',
-      whereArgs: [DateTime.now().millisecondsSinceEpoch],
       limit: 100,
       offset: capacity,
     ));
     int newLimit = overCapacityCacheObjectList.length;
+    debugPrint("Number of objects over capacity: $newLimit");
     List<CacheObject> result = [];
     if (overCapacityCacheObjectList.isNotEmpty) {
       // Database is over capacity. Query the database and pick objects based on the order above.
@@ -186,6 +186,7 @@ class CacheObjectProvider extends CacheInfoRepository with CacheInfoRepositoryHe
         whereArgs: [projectId, CacheObjectType.other.index],
         limit: newLimit,
       ));
+      debugPrint("Number of deletable other objects from other projects: ${otherProjectOtherCacheObjectList.length}");
       result.addAll(otherProjectOtherCacheObjectList);
       newLimit -= otherProjectOtherCacheObjectList.length;
       if (newLimit > 0) {
@@ -197,6 +198,8 @@ class CacheObjectProvider extends CacheInfoRepository with CacheInfoRepositoryHe
           whereArgs: [projectId, CacheObjectType.blueprint.index],
           limit: newLimit,
         ));
+        debugPrint(
+            "Number of deletable blueprint objects from other projects: ${otherProjectBlueprintCacheObjectList.length}");
         result.addAll(otherProjectBlueprintCacheObjectList);
         newLimit -= otherProjectBlueprintCacheObjectList.length;
         if (newLimit > 0) {
@@ -208,6 +211,8 @@ class CacheObjectProvider extends CacheInfoRepository with CacheInfoRepositoryHe
             whereArgs: [projectId, CacheObjectType.other.index],
             limit: newLimit,
           ));
+          debugPrint(
+              "Number of deletable other objects from this project: ${otherProjectBlueprintCacheObjectList.length}");
           result.addAll(currentProjectOtherCacheObjectList);
         }
       }
