@@ -3,6 +3,7 @@ import 'package:clock/clock.dart';
 enum CacheObjectType {
   other,
   blueprint,
+  userProfilePhoto,
   resourceUploadedPhoto,
   resourceUploadedSignature,
 }
