@@ -175,6 +175,11 @@ class CacheObjectProvider extends CacheInfoRepository with CacheInfoRepositoryHe
     ));
     int newLimit = overCapacityCacheObjectList.length;
     debugPrint("Number of objects over capacity: $newLimit");
+    debugPrint("Objects are:");
+    for (var element in overCapacityCacheObjectList) {
+      debugPrint(
+          "Id: ${element.id}, key: ${element.key}, touched: ${element.touched}, projectId: ${element.projectId}, type: ${element.type}");
+    }
     List<CacheObject> result = [];
     if (overCapacityCacheObjectList.isNotEmpty) {
       // Database is over capacity. Query the database and pick objects based on the order above.
