@@ -226,6 +226,16 @@ class CacheManager implements BaseCacheManager {
     return file;
   }
 
+  // Update file type in cache
+  @override
+  Future<void> updateFileType(String key, CacheObjectType cacheObjectType) async {
+    var cacheObject = await _store.retrieveCacheData(key);
+    if (cacheObject != null) {
+      cacheObject = cacheObject.copyWith(cacheObjectType: cacheObjectType);
+      await _store.putFile(cacheObject);
+    }
+  }
+
   /// Put a byte stream in the cache. When using an existing file you can use
   /// file.openRead(). It is recommended to specify  the [eTag] and the
   /// [maxAge]. When [maxAge] is passed and the eTag is not set the file will

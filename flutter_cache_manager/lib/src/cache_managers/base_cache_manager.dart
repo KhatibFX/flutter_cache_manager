@@ -73,6 +73,9 @@ abstract class BaseCacheManager {
       String? projectId,
       CacheObjectType? cacheObjectType});
 
+  /// Update file type in cache
+  Future<void> updateFileType(String key, CacheObjectType cacheObjectType);
+
   /// Put a byte stream in the cache. When using an existing file you can use
   /// file.openRead(). It is recommended to specify  the [eTag] and the
   /// [maxAge]. When [maxAge] is passed and the eTag is not set the file will
