@@ -272,7 +272,7 @@ class CacheObjectProvider extends CacheInfoRepository with CacheInfoRepositoryHe
   }
 
   @override
-  void setAdditionalConfig(AdditionalConfig additionalConfig) {
+  Future<void> setAdditionalConfig(AdditionalConfig? additionalConfig) async {
     // TODO: implement setAdditionalConfig
   }
 }

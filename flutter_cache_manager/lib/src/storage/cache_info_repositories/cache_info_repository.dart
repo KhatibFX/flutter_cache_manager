@@ -13,7 +13,7 @@ abstract class CacheInfoRepository {
   Future<bool> open();
 
   /// sets additional config
-  void setAdditionalConfig(AdditionalConfig additionalConfig);
+  Future<void> setAdditionalConfig(AdditionalConfig? additionalConfig);
 
   /// Updates a given [CacheObject], if it exists, or adds a new item to the repository
   Future<dynamic> updateOrInsert(CacheObject cacheObject);
