@@ -33,8 +33,9 @@ class CacheStore {
         fileSystem = config.fileSystem,
         _cacheInfoRepository = config.repo.open().then((value) => config.repo);
 
-  set additionalConfig(AdditionalConfig additionalConfig) {
+  setAdditionalConfig(AdditionalConfig additionalConfig) async {
     _additionalConfig = additionalConfig;
+    (await _cacheInfoRepository).setAdditionalConfig(additionalConfig);
   }
 
   Future<FileInfo?> getFile(String key, {bool ignoreMemCache = false}) async {

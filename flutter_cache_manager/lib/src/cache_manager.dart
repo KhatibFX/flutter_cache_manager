@@ -296,8 +296,8 @@ class CacheManager implements BaseCacheManager {
 
   /// Sets the additional config used when cleaning up the cache
   @override
-  void setAdditionalConfig(AdditionalConfig additionalConfig) {
-    _store.additionalConfig = additionalConfig;
+  Future<void> setAdditionalConfig(AdditionalConfig additionalConfig) async {
+    await _store.setAdditionalConfig(additionalConfig);
   }
 
   /// Closes the cache database

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_cache_manager/src/logger.dart';
 import 'package:flutter_cache_manager/src/storage/cache_object.dart';
 
@@ -10,6 +11,9 @@ abstract class CacheInfoRepository {
 
   /// Opens the repository, or just returns true if the repo is already open.
   Future<bool> open();
+
+  /// sets additional config
+  void setAdditionalConfig(AdditionalConfig additionalConfig);
 
   /// Updates a given [CacheObject], if it exists, or adds a new item to the repository
   Future<dynamic> updateOrInsert(CacheObject cacheObject);

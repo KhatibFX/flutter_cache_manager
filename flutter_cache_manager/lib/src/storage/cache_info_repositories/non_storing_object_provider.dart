@@ -1,3 +1,4 @@
+import 'package:flutter_cache_manager/src/config/additional_config.dart';
 import 'package:flutter_cache_manager/src/storage/cache_object.dart';
 
 import 'cache_info_repository.dart';
@@ -72,5 +73,10 @@ class NonStoringObjectProvider implements CacheInfoRepository {
   @override
   Future<bool> exists() async {
     return false;
+  }
+
+  @override
+  void setAdditionalConfig(AdditionalConfig additionalConfig) {
+    // TODO: implement setAdditionalConfig
   }
 }

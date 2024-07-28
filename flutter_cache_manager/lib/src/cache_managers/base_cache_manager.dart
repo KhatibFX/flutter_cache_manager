@@ -98,7 +98,7 @@ abstract class BaseCacheManager {
   Future<void> emptyCache();
 
   /// sets additional config used when cleaning up the cache
-  void setAdditionalConfig(AdditionalConfig additionalConfig);
+  Future<void> setAdditionalConfig(AdditionalConfig additionalConfig);
 
   /// Closes the cache database
   Future<void> dispose();

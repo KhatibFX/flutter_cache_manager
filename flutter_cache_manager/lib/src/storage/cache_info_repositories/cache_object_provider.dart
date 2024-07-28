@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter_cache_manager/src/config/additional_config.dart';
 import 'package:flutter_cache_manager/src/storage/cache_info_repositories/helper_methods.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -268,5 +269,10 @@ class CacheObjectProvider extends CacheInfoRepository with CacheInfoRepositoryHe
         // If we can not read the old db, a new one will be created.
       }
     }
+  }
+
+  @override
+  void setAdditionalConfig(AdditionalConfig additionalConfig) {
+    // TODO: implement setAdditionalConfig
   }
 }
