@@ -1,13 +1,12 @@
 import 'dart:io';
 
 import 'package:flutter_cache_manager/src/config/additional_config.dart';
+import 'package:flutter_cache_manager/src/storage/cache_info_repositories/cache_info_repository.dart';
 import 'package:flutter_cache_manager/src/storage/cache_info_repositories/helper_methods.dart';
+import 'package:flutter_cache_manager/src/storage/cache_object.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
-
-import '../cache_object.dart';
-import 'cache_info_repository.dart';
 
 const _tableCacheObject = 'cacheObject';
 
@@ -26,7 +25,7 @@ class CacheObjectProvider extends CacheInfoRepository with CacheInfoRepositoryHe
     if (!shouldOpenOnNewConnection()) {
       return openCompleter!.future;
     }
-    var path = await _getPath();
+    final path = await _getPath();
     await File(path).parent.create(recursive: true);
     db = await openDatabase(path, version: 4, onCreate: (Database db, int version) async {
       await db.execute('''
@@ -114,7 +113,7 @@ class CacheObjectProvider extends CacheInfoRepository with CacheInfoRepositoryHe
 
   @override
   Future<CacheObject> insert(CacheObject cacheObject, {bool setTouchedToNow = true}) async {
-    var id = await db!.insert(
+    final id = await db!.insert(
       _tableCacheObject,
       cacheObject.toMap(setTouchedToNow: setTouchedToNow),
     );
@@ -123,8 +122,8 @@ class CacheObjectProvider extends CacheInfoRepository with CacheInfoRepositoryHe
 
   @override
   Future<CacheObject?> get(String key) async {
-    List<Map> maps =
-        await db!.query(_tableCacheObject, columns: null, where: '${CacheObject.columnKey} = ?', whereArgs: [key]);
+    final List<Map<dynamic, dynamic>> maps = await db!.query(_tableCacheObject,
+        columns: null, where: '${CacheObject.columnKey} = ?', whereArgs: [key]);
     if (maps.isNotEmpty) {
       return CacheObject.fromMap(maps.first.cast<String, dynamic>());
     }
@@ -138,7 +137,8 @@ class CacheObjectProvider extends CacheInfoRepository with CacheInfoRepositoryHe
 
   @override
   Future<int> deleteAll(Iterable<int> ids) {
-    return db!.delete(_tableCacheObject, where: '${CacheObject.columnId} IN (' + ids.join(',') + ')');
+    return db!.delete(_tableCacheObject,
+        where: '${CacheObject.columnId} IN (${ids.join(',')})');
   }
 
   @override
@@ -234,7 +234,7 @@ class CacheObjectProvider extends CacheInfoRepository with CacheInfoRepositoryHe
   }
 
   @override
-  Future deleteDataFile() async {
+  Future<void> deleteDataFile() async {
     await _getPath();
   }
 
@@ -249,7 +249,7 @@ class CacheObjectProvider extends CacheInfoRepository with CacheInfoRepositoryHe
     if (_path != null) {
       directory = File(_path!).parent;
     } else {
-      directory = (await getApplicationSupportDirectory());
+      directory = await getApplicationSupportDirectory();
     }
     await directory.create(recursive: true);
     if (_path == null || !_path!.endsWith('.db')) {
@@ -260,8 +260,8 @@ class CacheObjectProvider extends CacheInfoRepository with CacheInfoRepositoryHe
   }
 
   // Migration for pre-V2 path on iOS and macOS
-  Future _migrateOldDbPath(String newDbPath) async {
-    final oldDbPath = join((await getDatabasesPath()), '$databaseName.db');
+  Future<void> _migrateOldDbPath(String newDbPath) async {
+    final oldDbPath = join(await getDatabasesPath(), '$databaseName.db');
     if (oldDbPath != newDbPath && await File(oldDbPath).exists()) {
       try {
         await File(oldDbPath).rename(newDbPath);

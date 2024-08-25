@@ -1,7 +1,6 @@
 import 'package:flutter_cache_manager/src/config/additional_config.dart';
+import 'package:flutter_cache_manager/src/storage/cache_info_repositories/cache_info_repository.dart';
 import 'package:flutter_cache_manager/src/storage/cache_object.dart';
-
-import 'cache_info_repository.dart';
 
 class NonStoringObjectProvider implements CacheInfoRepository {
   @override
@@ -21,7 +20,7 @@ class NonStoringObjectProvider implements CacheInfoRepository {
 
   @override
   Future<CacheObject?> get(String url) {
-    return Future.value(null);
+    return Future.value();
   }
 
   @override

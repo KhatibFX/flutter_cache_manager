@@ -12,7 +12,9 @@ enum FileSource { NA, Cache, Online }
 /// FileInfo contains the fetch File next to some info on the validity and
 /// the origin of the file.
 class FileInfo extends FileResponse {
-  const FileInfo(this.file, this.source, this.validTill, String originalUrl) : super(originalUrl);
+  const FileInfo(this.file, this.source, this.validTill, String originalUrl,
+      {this.statusCode = 200})
+      : super(originalUrl);
 
   /// Fetched file
   final File file;
@@ -23,4 +25,6 @@ class FileInfo extends FileResponse {
   /// Validity date of the file. After this date the validity is not guaranteed
   /// and the CacheManager will try to update the file. The field is optional, and if null, the file is valid forever.
   final DateTime? validTill;
+
+  final int statusCode;
 }

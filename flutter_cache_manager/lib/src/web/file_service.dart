@@ -2,9 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:clock/clock.dart';
+import 'package:flutter_cache_manager/src/web/mime_converter.dart';
 import 'package:http/http.dart' as http;
-
-import 'mime_converter.dart';
 
 ///Flutter Cache Manager
 ///Copyright (c) 2019 Rene Floor
@@ -90,10 +89,11 @@ class HttpGetResponse implements FileServiceResponse {
       for (final setting in controlSettings) {
         final sanitizedSetting = setting.trim().toLowerCase();
         if (sanitizedSetting == 'no-cache') {
-          ageDuration = const Duration();
+          ageDuration = Duration.zero;
         }
         if (sanitizedSetting.startsWith('max-age=')) {
-          var validSeconds = int.tryParse(sanitizedSetting.split('=')[1]) ?? 0;
+          final validSeconds =
+              int.tryParse(sanitizedSetting.split('=')[1]) ?? 0;
           if (validSeconds > 0) {
             ageDuration = Duration(seconds: validSeconds);
           }

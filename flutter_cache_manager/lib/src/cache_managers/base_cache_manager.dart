@@ -4,8 +4,8 @@ import 'package:file/file.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_cache_manager/src/storage/cache_object.dart';
 
-import '../result/file_info.dart';
-import '../result/file_response.dart';
+import 'package:flutter_cache_manager/src/result/file_info.dart';
+import 'package:flutter_cache_manager/src/result/file_response.dart';
 
 /// Interface of the CacheManager. In general [CacheManager] can be used
 /// directly.

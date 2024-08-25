@@ -7,5 +7,5 @@ class QueueItem {
   final String? projectId;
   final CacheObjectType? cacheObjectType;
 
-  QueueItem(this.url, this.key, this.headers, {this.projectId, this.cacheObjectType});
+  const QueueItem(this.url, this.key, this.headers, {this.projectId, this.cacheObjectType});
 }
