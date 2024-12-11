@@ -70,7 +70,7 @@ class CacheManager implements BaseCacheManager {
   /// When a cached file is not available the newly downloaded file is returned.
   @override
   Future<File> getSingleFile(String url,
-      {String? key, Map<String, String>? headers, String? projectId, CacheObjectType? cacheObjectType}) async {
+      {String? key, Map<String, String>? headers, String? projectId, String? cacheObjectType}) async {
     key ??= url;
     final cacheFile = await getFileFromCache(key);
     if (cacheFile != null && (cacheFile.validTill == null || cacheFile.validTill!.isAfter(DateTime.now()))) {
@@ -88,7 +88,7 @@ class CacheManager implements BaseCacheManager {
   @override
   @Deprecated('Prefer to use the new getFileStream method')
   Stream<FileInfo> getFile(String url,
-      {String? key, Map<String, String>? headers, String? projectId, CacheObjectType? cacheObjectType}) {
+      {String? key, Map<String, String>? headers, String? projectId, String? cacheObjectType}) {
     return getFileStream(
       url,
       key: key,
@@ -115,7 +115,7 @@ class CacheManager implements BaseCacheManager {
       Map<String, String>? headers,
       bool withProgress = false,
       String? projectId,
-      CacheObjectType? cacheObjectType}) {
+      String? cacheObjectType}) {
     key ??= url;
     final streamController = StreamController<FileResponse>();
     _pushFileToStream(streamController, url, key, headers, withProgress,
@@ -129,7 +129,7 @@ class CacheManager implements BaseCacheManager {
       String? key,
       Map<String, String>? headers,
       bool withProgress,
-      {required String? projectId, CacheObjectType? cacheObjectType}) async {
+      {String? projectId, String? cacheObjectType}) async {
     key ??= url;
     FileInfo? cacheFile;
     try {
@@ -182,7 +182,7 @@ class CacheManager implements BaseCacheManager {
       Map<String, String>? authHeaders,
       bool force = false,
       String? projectId,
-      CacheObjectType? cacheObjectType}) async {
+      String? cacheObjectType}) async {
     key ??= url;
     final fileResponse = await _webHelper
         .downloadFile(
@@ -220,7 +220,7 @@ class CacheManager implements BaseCacheManager {
       Duration? maxAge,
       String fileExtension = 'file',
       String? projectId,
-      CacheObjectType? cacheObjectType}) async {
+      String? cacheObjectType}) async {
     key ??= url;
     var cacheObject = await _store.retrieveCacheData(key);
     cacheObject ??= CacheObject(
@@ -245,7 +245,7 @@ class CacheManager implements BaseCacheManager {
 
   // Update file type in cache
   @override
-  Future<void> updateFileType(String key, CacheObjectType cacheObjectType) async {
+  Future<void> updateFileType(String key, String cacheObjectType) async {
     var cacheObject = await _store.retrieveCacheData(key);
     if (cacheObject != null) {
       cacheObject = cacheObject.copyWith(cacheObjectType: cacheObjectType);
@@ -267,7 +267,7 @@ class CacheManager implements BaseCacheManager {
       Duration? maxAge,
       String fileExtension = 'file',
       String? projectId,
-      CacheObjectType? cacheObjectType}) async {
+      String? cacheObjectType}) async {
     key ??= url;
     var cacheObject = await _store.retrieveCacheData(key);
     cacheObject ??= CacheObject(
@@ -309,7 +309,7 @@ class CacheManager implements BaseCacheManager {
 
   /// Removes all files from the cache
   @override
-  Future<void> emptyCache() => _store.emptyCache();
+  Future<void> emptyCache({List<String?> persistentCacheObjectTypes = const []}) => _store.emptyCache(persistentCacheObjectTypes: persistentCacheObjectTypes);
 
   /// Sets the additional config used when cleaning up the cache
   @override

@@ -25,7 +25,7 @@ mixin ImageCacheManager on BaseCacheManager {
     int? maxHeight,
     int? maxWidth,
     String? projectId,
-    CacheObjectType? cacheObjectType,
+    String? cacheObjectType,
   }) async* {
     if (maxHeight == null && maxWidth == null) {
       yield* getFileStream(url,
@@ -77,7 +77,7 @@ mixin ImageCacheManager on BaseCacheManager {
     int? maxWidth,
     int? maxHeight,
     String? projectId,
-    CacheObjectType? cacheObjectType,
+    String? cacheObjectType,
   ) async {
     final originalFileName = originalFile.file.path;
     final fileExtension = originalFileName.split('.').last;
@@ -137,7 +137,7 @@ mixin ImageCacheManager on BaseCacheManager {
     int? maxWidth,
     int? maxHeight,
     String? projectId,
-    CacheObjectType? cacheObjectType,
+    String? cacheObjectType,
   }) async* {
     await for (final response in getFileStream(
       url,

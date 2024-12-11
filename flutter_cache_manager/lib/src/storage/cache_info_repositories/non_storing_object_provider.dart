@@ -29,12 +29,12 @@ class NonStoringObjectProvider implements CacheInfoRepository {
   }
 
   @override
-  Future<List<CacheObject>> getObjectsOverCapacity({required int capacity, required String projectId}) {
+  Future<List<CacheObject>> getObjectsOverCapacity({required int capacity, required List<OverCapacityPolicy>? overCapacityPolicies}) {
     return Future.value([]);
   }
 
   @override
-  Future<List<CacheObject>> getOldObjects({required Duration maxAge}) {
+  Future<List<CacheObject>> getOldObjects({required List<MaxAgePolicy>? maxAgePolicies}) {
     return Future.value([]);
   }
 

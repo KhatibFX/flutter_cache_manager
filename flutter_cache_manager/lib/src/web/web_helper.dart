@@ -35,9 +35,8 @@ class WebHelper {
   Stream<FileResponse> downloadFile(String url,
       {String? key,
       Map<String, String>? authHeaders,
-      bool ignoreMemCache = false,
-      required String? projectId,
-      CacheObjectType? cacheObjectType}) {
+      bool ignoreMemCache = false, String? projectId,
+      String? cacheObjectType}) {
     key ??= url;
     var subject = _memCache[key];
     if (subject == null || ignoreMemCache) {
@@ -54,7 +53,7 @@ class WebHelper {
       String url,
       String key,
       Map<String, String>? authHeaders,
-      {String? projectId, CacheObjectType? cacheObjectType}) async {
+      {String? projectId, String? cacheObjectType}) async {
     //Add to queue if there are too many calls.
     if (concurrentCalls >= _maxConcurrentRequests) {
       _queue.add(QueueItem(url, key, authHeaders, projectId: projectId, cacheObjectType: cacheObjectType));
@@ -88,7 +87,7 @@ class WebHelper {
 
   ///Download the file from the url
   Stream<FileResponse> _updateFile(String url, String key,
-      {Map<String, String>? authHeaders, String? projectId, CacheObjectType? cacheObjectType}) async* {
+      {Map<String, String>? authHeaders, String? projectId, String? cacheObjectType}) async* {
     var cacheObject = await _store.retrieveCacheData(key);
     cacheObject = cacheObject == null
         ? CacheObject(

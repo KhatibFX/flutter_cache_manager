@@ -23,8 +23,6 @@ class CacheStore {
 
   int get _capacity => _config.maxNrOfCacheObjects;
 
-  Duration get _maxAge => _config.stalePeriod;
-  String? get _projectId => _additionalConfig?.projectId;
   Function({required List<CacheObject> cacheObjects})? get _onRemoved => _additionalConfig?.onRemoved;
 
   DateTime lastCleanupRun = DateTime.now();
@@ -144,14 +142,12 @@ class CacheStore {
     final provider = await _cacheInfoRepository;
     await provider.setAdditionalConfig(_additionalConfig);
 
-    if (_projectId != null) {
-      final overCapacity = await provider.getObjectsOverCapacity(capacity: _capacity, projectId: _projectId!);
-      for (final cacheObject in overCapacity) {
-        _removeCachedFile(cacheObject, toRemove);
-      }
+    final overCapacity = await provider.getObjectsOverCapacity(capacity: _capacity, overCapacityPolicies: _additionalConfig?.overCapacityPolicies ?? []);
+    for (final cacheObject in overCapacity) {
+      _removeCachedFile(cacheObject, toRemove);
     }
 
-    final oldObjects = await provider.getOldObjects(maxAge: _maxAge);
+    final oldObjects = await provider.getOldObjects(maxAgePolicies: _additionalConfig?.maxAgePolicies ?? []);
     for (final cacheObject in oldObjects) {
       _removeCachedFile(cacheObject, toRemove);
     }
@@ -159,13 +155,16 @@ class CacheStore {
     await provider.deleteAll(toRemove);
   }
 
-  Future<void> emptyCache() async {
+  Future<void> emptyCache({List<String?> persistentCacheObjectTypes = const []}) async {
     final provider = await _cacheInfoRepository;
     await provider.setAdditionalConfig(_additionalConfig);
     final toRemove = <int>[];
     final allObjects = await provider.getAllObjects();
     var futures = <Future>[];
     for (final cacheObject in allObjects) {
+      if (persistentCacheObjectTypes.contains(cacheObject.cacheObjectType)) {
+        continue;
+      }
       futures.add(_removeCachedFile(cacheObject, toRemove));
     }
     await Future.wait(futures);

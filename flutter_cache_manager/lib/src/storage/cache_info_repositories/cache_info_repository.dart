@@ -40,10 +40,10 @@ abstract class CacheInfoRepository {
   ///
   /// The exact implementation is up to the repository, but implementations should
   /// return a preferred list of items. For example, the least recently accessed
-  Future<List<CacheObject>> getObjectsOverCapacity({required int capacity, required String projectId});
+  Future<List<CacheObject>> getObjectsOverCapacity({required int capacity, required List<OverCapacityPolicy>? overCapacityPolicies});
 
   /// Returns a list of [CacheObject] that are older than [maxAge]
-  Future<List<CacheObject>> getOldObjects({required Duration maxAge});
+  Future<List<CacheObject>> getOldObjects({required List<MaxAgePolicy>? maxAgePolicies});
 
   /// Close the connection to the repository. If this is the last connection
   /// to the repository it will return true and the repository is truly

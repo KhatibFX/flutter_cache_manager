@@ -1,13 +1,5 @@
 import 'package:clock/clock.dart';
 
-enum CacheObjectType {
-  other,
-  blueprint,
-  userProfilePhoto,
-  resourceUploadedPhoto,
-  resourceUploadedSignature,
-}
-
 ///Flutter Cache Manager
 ///Copyright (c) 2019 Rene Floor
 ///Released under MIT License.
@@ -35,9 +27,8 @@ class CacheObject {
     this.length,
     this.touched,
     this.projectId,
-    CacheObjectType? cacheObjectType,
-  })  : key = key ?? url,
-        cacheObjectType = cacheObjectType ?? CacheObjectType.other;
+    this.cacheObjectType,
+  })  : key = key ?? url;
 
   CacheObject.fromMap(Map<String, dynamic> map)
       : id = map[columnId] as int,
@@ -51,7 +42,7 @@ class CacheObject {
         touched = DateTime.fromMillisecondsSinceEpoch(map[columnTouched] as int),
         projectId = map[columnProjectId] as String?,
         cacheObjectType =
-            map[columnType] != null ? CacheObjectType.values[map[columnType] as int] : CacheObjectType.other;
+            map[columnType] as String?;
 
   /// Internal ID used to represent this cache object
   final int? id;
@@ -83,7 +74,7 @@ class CacheObject {
   final String? projectId;
 
   /// The cache object type
-  final CacheObjectType cacheObjectType;
+  final String? cacheObjectType;
 
   Map<String, dynamic> toMap({bool setTouchedToNow = true}) {
     final map = <String, dynamic>{
@@ -96,7 +87,7 @@ class CacheObject {
       columnLength: length,
       if (id != null) columnId: id,
       if (projectId != null) columnProjectId: projectId,
-      columnType: cacheObjectType.index,
+      if (cacheObjectType != null) columnType: cacheObjectType,
     };
     return map;
   }
@@ -113,7 +104,7 @@ class CacheObject {
       String? eTag,
       int? length,
       String? projectId,
-      CacheObjectType? cacheObjectType}) {
+      String? cacheObjectType}) {
     return CacheObject(
       url ?? this.url,
       id: id ?? this.id,

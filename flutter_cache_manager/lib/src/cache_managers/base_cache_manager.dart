@@ -2,10 +2,6 @@ import 'dart:typed_data';
 
 import 'package:file/file.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:flutter_cache_manager/src/storage/cache_object.dart';
-
-import 'package:flutter_cache_manager/src/result/file_info.dart';
-import 'package:flutter_cache_manager/src/result/file_response.dart';
 
 /// Interface of the CacheManager. In general [CacheManager] can be used
 /// directly.
@@ -16,7 +12,7 @@ abstract class BaseCacheManager {
   /// downloaded in the background. When a cached file is not available the
   /// newly downloaded file is returned.
   Future<File> getSingleFile(String url,
-      {String key, Map<String, String> headers, String? projectId, CacheObjectType? cacheObjectType});
+      {String key, Map<String, String> headers, String? projectId, String? cacheObjectType});
 
   /// Get the file from the cache and/or online, depending on availability and age.
   /// Downloaded form [url], [headers] can be used for example for authentication.
@@ -24,7 +20,7 @@ abstract class BaseCacheManager {
   /// cached file is too old the newly downloaded file is returned afterwards.
   @Deprecated('Prefer to use the new getFileStream method')
   Stream<FileInfo> getFile(String url,
-      {String key, Map<String, String> headers, String? projectId, CacheObjectType? cacheObjectType});
+      {String key, Map<String, String> headers, String? projectId, String? cacheObjectType});
 
   /// Get the file from the cache and/or online, depending on availability and age.
   /// Downloaded form [url], [headers] can be used for example for authentication.
@@ -42,7 +38,7 @@ abstract class BaseCacheManager {
       Map<String, String>? headers,
       bool withProgress,
       String? projectId,
-      CacheObjectType? cacheObjectType});
+      String? cacheObjectType});
 
   ///Download the file and add to cache
   Future<FileInfo> downloadFile(String url,
@@ -50,7 +46,7 @@ abstract class BaseCacheManager {
       Map<String, String>? authHeaders,
       bool force = false,
       String? projectId,
-      CacheObjectType? cacheObjectType});
+      String? cacheObjectType});
 
   /// Get the file from the cache.
   /// Specify [ignoreMemCache] to force a re-read from the database
@@ -71,10 +67,10 @@ abstract class BaseCacheManager {
       Duration? maxAge,
       String fileExtension = 'file',
       String? projectId,
-      CacheObjectType? cacheObjectType});
+      String? cacheObjectType});
 
   /// Update file type in cache
-  Future<void> updateFileType(String key, CacheObjectType cacheObjectType);
+  Future<void> updateFileType(String key, String cacheObjectType);
 
   /// Put a byte stream in the cache. When using an existing file you can use
   /// file.openRead(). It is recommended to specify  the [eTag] and the
@@ -89,13 +85,13 @@ abstract class BaseCacheManager {
       Duration? maxAge,
       String fileExtension = 'file',
       String? projectId,
-      CacheObjectType? cacheObjectType});
+      String? cacheObjectType});
 
   /// Remove a file from the cache
   Future<void> removeFile(String key);
 
   /// Removes all files from the cache
-  Future<void> emptyCache();
+  Future<void> emptyCache({List<String> persistentCacheObjectTypes = const []});
 
   /// sets additional config used when cleaning up the cache
   Future<void> setAdditionalConfig(AdditionalConfig additionalConfig);

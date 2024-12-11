@@ -88,7 +88,7 @@ class JsonCacheInfoRepository extends CacheInfoRepository
 
   /// This method is only called on web, so we don't need to consider modifying it
   @override
-  Future<List<CacheObject>> getObjectsOverCapacity({required int capacity, required String projectId}) async {
+  Future<List<CacheObject>> getObjectsOverCapacity({required int capacity, required List<OverCapacityPolicy>? overCapacityPolicies}) async {
     final allSorted = _cacheObjects.values.toList()
       ..sort((c1, c2) => c1.touched!.compareTo(c2.touched!));
     if (allSorted.length <= capacity) return [];
@@ -96,13 +96,16 @@ class JsonCacheInfoRepository extends CacheInfoRepository
   }
 
   @override
-  Future<List<CacheObject>> getOldObjects({required Duration maxAge}) async {
-    final oldestTimestamp = DateTime.now().subtract(maxAge);
-    return _cacheObjects.values
-        .where(
-          (element) => element.touched!.isBefore(oldestTimestamp),
-        )
-        .toList();
+  Future<List<CacheObject>> getOldObjects({required List<MaxAgePolicy>? maxAgePolicies}) async {
+    if(maxAgePolicies?.isNotEmpty == true) {
+      final oldestTimestamp = DateTime.now().subtract(maxAgePolicies!.first.maxAge);
+      return _cacheObjects.values
+          .where(
+            (element) => element.touched!.isBefore(oldestTimestamp),
+      )
+          .toList();
+    }
+    return [];
   }
 
   @override

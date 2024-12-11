@@ -165,7 +165,7 @@ class CacheObjectProvider extends CacheInfoRepository with CacheInfoRepositoryHe
   /// 3. Objects that belong to the current project, preferably the least recently accessed, where the type is other
 
   @override
-  Future<List<CacheObject>> getObjectsOverCapacity({required int capacity, required String projectId}) async {
+  Future<List<CacheObject>> getObjectsOverCapacity({required int capacity, String? projectId, required List<OverCapacityPolicy>? overCapacityPolicies}) async {
     List<CacheObject> overCapacityCacheObjectList = CacheObject.fromMapList(await db!.query(
       _tableCacheObject,
       columns: null,
@@ -177,53 +177,73 @@ class CacheObjectProvider extends CacheInfoRepository with CacheInfoRepositoryHe
     List<CacheObject> result = [];
     if (overCapacityCacheObjectList.isNotEmpty) {
       // Database is over capacity. Query the database and pick objects based on the order above.
-      List<CacheObject> otherProjectOtherCacheObjectList = CacheObject.fromMapList(await db!.query(
-        _tableCacheObject,
-        columns: null,
-        orderBy: '${CacheObject.columnTouched} ASC',
-        where: '${CacheObject.columnProjectId} != ? AND ${CacheObject.columnType} = ?',
-        whereArgs: [projectId, CacheObjectType.other.index],
-        limit: newLimit,
-      ));
-      result.addAll(otherProjectOtherCacheObjectList);
-      newLimit -= otherProjectOtherCacheObjectList.length;
-      if (newLimit > 0) {
-        List<CacheObject> otherProjectBlueprintCacheObjectList = CacheObject.fromMapList(await db!.query(
+      // Dynamically create a loop with additive queries based on overCapacityPolicies
+      for (final OverCapacityPolicy policy in overCapacityPolicies ?? []) {
+        if (newLimit <= 0) break;
+        List<CacheObject> policyCacheObjectList = CacheObject.fromMapList(await db!.query(
           _tableCacheObject,
           columns: null,
           orderBy: '${CacheObject.columnTouched} ASC',
-          where: '${CacheObject.columnProjectId} != ? AND ${CacheObject.columnType} = ?',
-          whereArgs: [projectId, CacheObjectType.blueprint.index],
+          where: '${CacheObject.columnProjectId} ${policy.projectIdComparator} ? AND ${CacheObject.columnType} ${policy.cacheObjectTypeComparator} ?',
+          whereArgs: [policy.projectId, policy.cacheObjectType],
           limit: newLimit,
         ));
-        result.addAll(otherProjectBlueprintCacheObjectList);
-        newLimit -= otherProjectBlueprintCacheObjectList.length;
-        if (newLimit > 0) {
-          List<CacheObject> currentProjectOtherCacheObjectList = CacheObject.fromMapList(await db!.query(
-            _tableCacheObject,
-            columns: null,
-            orderBy: '${CacheObject.columnTouched} ASC',
-            where: '${CacheObject.columnProjectId} = ? AND ${CacheObject.columnType} = ?',
-            whereArgs: [projectId, CacheObjectType.other.index],
-            limit: newLimit,
-          ));
-          result.addAll(currentProjectOtherCacheObjectList);
-        }
+        result.addAll(policyCacheObjectList);
+        newLimit -= policyCacheObjectList.length;
       }
+
+      // List<CacheObject> otherProjectOtherCacheObjectList = CacheObject.fromMapList(await db!.query(
+      //   _tableCacheObject,
+      //   columns: null,
+      //   orderBy: '${CacheObject.columnTouched} ASC',
+      //   where: '${CacheObject.columnProjectId} != ? AND ${CacheObject.columnType} = ?',
+      //   whereArgs: [projectId, CacheObjectType.other.index],
+      //   limit: newLimit,
+      // ));
+      // result.addAll(otherProjectOtherCacheObjectList);
+      // newLimit -= otherProjectOtherCacheObjectList.length;
+      // if (newLimit > 0) {
+      //   List<CacheObject> otherProjectBlueprintCacheObjectList = CacheObject.fromMapList(await db!.query(
+      //     _tableCacheObject,
+      //     columns: null,
+      //     orderBy: '${CacheObject.columnTouched} ASC',
+      //     where: '${CacheObject.columnProjectId} != ? AND ${CacheObject.columnType} = ?',
+      //     whereArgs: [projectId, CacheObjectType.blueprint.index],
+      //     limit: newLimit,
+      //   ));
+      //   result.addAll(otherProjectBlueprintCacheObjectList);
+      //   newLimit -= otherProjectBlueprintCacheObjectList.length;
+      //   if (newLimit > 0) {
+      //     List<CacheObject> currentProjectOtherCacheObjectList = CacheObject.fromMapList(await db!.query(
+      //       _tableCacheObject,
+      //       columns: null,
+      //       orderBy: '${CacheObject.columnTouched} ASC',
+      //       where: '${CacheObject.columnProjectId} = ? AND ${CacheObject.columnType} = ?',
+      //       whereArgs: [projectId, CacheObjectType.other.index],
+      //       limit: newLimit,
+      //     ));
+      //     result.addAll(currentProjectOtherCacheObjectList);
+      //   }
+      // }
     }
     return result;
   }
 
   /// For the wakecap cache manager, objects that are old should be picked where the type is other
   @override
-  Future<List<CacheObject>> getOldObjects({required Duration maxAge}) async {
-    return CacheObject.fromMapList(await db!.query(
-      _tableCacheObject,
-      where: '${CacheObject.columnTouched} < ? AND ${CacheObject.columnType} = ?',
-      columns: null,
-      whereArgs: [DateTime.now().subtract(maxAge).millisecondsSinceEpoch, CacheObjectType.other.index],
-      limit: 100,
-    ));
+  Future<List<CacheObject>> getOldObjects({required List<MaxAgePolicy>? maxAgePolicies}) async {
+    List<CacheObject> result = [];
+    for(final MaxAgePolicy policy in maxAgePolicies ?? []) {
+      final oldestTimestamp = DateTime.now().subtract(policy.maxAge);
+      result.addAll(CacheObject.fromMapList(await db!.query(
+        _tableCacheObject,
+        where: '${CacheObject.columnTouched} < ? AND ${CacheObject.columnType} = ?',
+        columns: null,
+        whereArgs: [oldestTimestamp.millisecondsSinceEpoch, policy.cacheObjectType],
+        limit: 100,
+      )));
+    }
+    return result;
   }
 
   @override
