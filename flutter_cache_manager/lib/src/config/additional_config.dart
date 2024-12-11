@@ -3,10 +3,10 @@ import 'package:flutter_cache_manager/src/storage/cache_object.dart';
 class AdditionalConfig {
   final String? projectId;
   final Function({required List<CacheObject> cacheObjects})? onRemoved;
-
+  final Map<String, dynamic>? extras;
   final List<MaxAgePolicy>? maxAgePolicies;
   final List<OverCapacityPolicy>? overCapacityPolicies;
-  const AdditionalConfig({this.projectId, this.onRemoved, this.maxAgePolicies, this.overCapacityPolicies});
+  const AdditionalConfig({this.projectId, this.onRemoved, this.extras, this.maxAgePolicies, this.overCapacityPolicies});
 }
 
 class MaxAgePolicy {
